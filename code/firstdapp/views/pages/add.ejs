@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title><%= title %></title>
+    <!-- CSS only -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css"> 
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+    <div class="container py-4">
+        
+        <%- include("../partials/header.ejs")%>
+
+        <div class="row align-items-md-stretch px-3">
+            <div class="col-md-6">
+
+                <div class="col align-items-md-stretch">
+
+                    <div class="p-5 mb-4 rounded-3" id="div-connect">
+                        <h5>Connect to istSOS database</h5>
+                        <form method="post" action="/add/set/ip">
+                            <div class="input-group input-group-sm mb-3">
+                                <span class="input-group-text" id="inputGroup-sizing-default">Ip</span>
+                                <input type="text" name="input-ip" id="input-ip" value="<%= doc['istsos']['ip'] %>" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                            </div>
+                        </form> 
+                        <form method="post" action="/add/set/db">
+                            <div class="input-group input-group-sm mb-3">
+                                <span class="input-group-text" id="inputGroup-sizing-default">Db</span>
+                                <input type="text" name="input-db" id="input-db" value="<%= doc['istsos']['db'] %>" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="p-5 mb-4 rounded-3" id="div-select">
+                        <div class="table-responsive-sm">
+                            <table class="table table-sm table-dark table-hover" id="table-base">
+                                <thead>
+                                    <tr>
+                                        <th>Station name</th>
+                                        <th>File name</th>
+                                        <th width="30px"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-body" class="align-middle">
+                                    <tr></tr>
+                                </tbody>
+                            </table> 
+                        </div>
+                        <button class="btn mt-4 btn-light" type="button" id="btn-select-files">Select files</button>
+                        <input type="file" id="selected-files" name="myFiles" accept=".txt" style="display: none;" multiple>
+                        <button class="btn mt-4 ms-1 btn-success" type="button" id="btn-submit" disabled="disabled">Submit</button>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="h-100 p-5  bg-light rounded-3" id="div-output-console">
+                    <h2 class="mb-4">Console Output</h2>
+                    <div id="output-console"></div> 
+                    <!-- style="height: 400px; overflow-y: scroll; padding-right: 5px;" -->
+                </div>                
+            </div>
+        </div>
+    
+        <%- include("../partials/footer.ejs")%>
+
+    </div>
+
+    <!-- JavaScript Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+
+        $(document).ready(function() {
+            
+            var allFilesObj = [];
+
+            // Remove a row from table
+            $('#table-body').on('click', '.remove', function () {
+                const fileDel = $(this).closest('tr');
+                const curFile = fileDel.get(0).children[1].innerHTML;
+                allFilesObj.splice(search(curFile, allFilesObj), 1);
+                fileDel.remove();
+                changeSubmit();
+            });
+
+            // Select files
+            $("#btn-select-files").on('click', function() {
+                $('#selected-files').trigger('click');
+            });
+
+            $("#selected-files").change(function() {
+                for (var i = 0; i < $(this).get(0).files.length; i++) {
+                    var curFile = $(this).get(0).files[i];
+                    var fileName = curFile.name;
+                    if (search(fileName, allFilesObj) === -1){
+                        allFilesObj.push(curFile);
+                        
+                        // Adding a row inside the tbody.
+                        $('#table-body').append(
+                            `<tr>
+                            <td class="text-break">${(curFile.name).split('_')[0].toUpperCase()}</td>
+                            <td class="text-break" id="selected-file">${curFile.name}</td>
+                            <td>
+                                <button style="all: unset; cursor: pointer;" type="button" class="btn remove"><i class="bi bi-trash"></i></button>
+                            </td>
+                            </tr>`);
+                    }
+                }
+                changeSubmit();
+                this.value = null;
+            });  
+
+            $("#btn-submit").on('click', async function() {
+                for (let x = 0; x < allFilesObj.length; x++){
+                    let form_data = new FormData();
+                    form_data.append('myFiles', allFilesObj[x]);
+                    await $.ajax({
+                        'url':'/add/upload/files',
+                        'type':'POST',
+                        'data': form_data,
+                        'success': function(res) {
+                            console.log(res.result);
+                            var check = res.result.find(x => x == 'error');
+                            if(res.result && check == null) {
+                                if(res.result[0] == 'already') {
+                                    station = res.result[1];
+                                    msg = 'This file already exist in istSOS database as well as in blockchain.';
+                                    $("#output-console").prepend(
+                                        `<div class="mb-5 card text-white bg-info-custom rounded-3">
+                                            <h5 class="p-3 card-header text-break">${station}</h5>
+                                            <div class="card-body">
+                                                <p class="card-text">${msg}</p>
+                                            </div>
+                                        </div>`);
+                                    
+                                }else {
+                                    station = res.result[0];
+                                    msg = '';
+                                    for (var i=1; i<res.result.length; i++) {
+                                        if (res.result[i].substring(0, 4) != 'data') {
+                                            msg += res.result[i] + '<br>';
+                                        } 
+                                    }
+                                    $("#output-console").prepend(
+                                        `<div class="mb-5 card text-white bg-success-custom rounded-3">
+                                            <h5 class="p-3 card-header text-break">${station}</h5>
+                                            <div class="card-body">
+                                                <p class="card-text">${msg}</p>
+                                            </div>
+                                        </div>`);
+                                }
+                            }else {
+                                if (res.result[2] == 'region') {
+                                    msg = res.result[1];
+                                    station = res.result[3].split('/').pop().split('.')[0].toUpperCase();
+                                }else {
+                                    msg = 'An error was occured.';
+                                    station = res.result[1].split('/').pop().split('.')[0].toUpperCase();
+                                }
+                                msg += '<br>This file did not added to istSOS.';
+                                $("#output-console").prepend(
+                                    `<div class="mb-5 card text-white bg-danger-custom rounded-3">
+                                        <h5 class="p-3 card-header text-break">${station}</h5>
+                                        <div class="card-body">
+                                            <p class="card-text">${msg}</p>
+                                        </div>
+                                    </div>`);
+                            }
+                        },
+                        'contentType': false,
+                        'processData': false
+                    }).catch(e=>console.log(e));
+                }
+
+                allFilesObj = [];
+                changeSubmit();
+                $('#table-body').empty();
+                $('#table-body').append(`<tr></tr>`);  
+                
+            });
+
+            function search(name, myArray){
+                for (var i=0; i < myArray.length; i++) {
+                    if (myArray[i].name === name) {
+                        return i;
+                    }
+                }
+                return -1;
+            };
+
+            function changeSubmit() {
+                if (allFilesObj.length != 0) {
+                    $("#btn-submit").removeAttr('disabled');
+                }else {
+                    $("#btn-submit").attr('disabled', true);
+                };
+            };
+
+            function print(value = "Im here!!") {
+                console.log(value);
+            };
+            
+        });
+
+    </script>
+</body>
+
+</html>

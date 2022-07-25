@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>
+        <%= title %>
+    </title>
+
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js"></script>
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/css/bootstrap-datetimepicker.min.css"rel="stylesheet">
+    <!-- Bootstrap-icons.css -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <!-- Style.css -->
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+
+    <div class="container py-4">
+        
+        <%- include("../partials/header.ejs")%>
+
+        <div class="row align-items-md-stretch px-3">
+
+            <div class="col-12 col-md-3 mb-4" id="left">
+                <div style="height: 40%; padding-bottom: 30px;">
+                    <div class="p-5 mb-5 rounded-3" id="div-connect" >
+                        <h4>Connect to istSOS database</h4>
+                        <form method="post" action="/chart/set/ip">
+                            <div class="input-group input-group-sm mb-3">
+                                <span class="input-group-text" id="inputGroup-sizing-default">Ip</span>
+                                <input type="text" name="input-ip" id="input-ip" value="<%= doc['istsos']['ip'] %>" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                            </div>
+                        </form> 
+                        <form method="post" action="/chart/set/db">
+                            <div class="input-group input-group-sm mb-3">
+                                <span class="input-group-text" id="inputGroup-sizing-default">Db</span>
+                                <input type="text" name="input-db" id="input-db" value="<%= doc['istsos']['db'] %>" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+
+                <div class="p-5 mb-4 rounded-3" id="div-select" style="height: 60%;">
+                    <!-- <h4>Export Json file for data</h4> -->
+                    <div class="input-group input-group-sm mb-3">
+                        <label class="input-group-text" for="select-station">Station</label>
+                        <select class="form-select" id="select-station">
+                            <option selected disabled>Choose...</option>
+                        </select>                        
+                    </div>
+                    <div class="input-group input-group-sm mb-3">
+                        <label class="input-group-text" for="datetime-from">From</label>
+                        <input id="datetime-from" class="form-control" type="date" disabled />
+                    </div>
+                    <div class="input-group input-group-sm has-validation mb-3">
+                        <label class="input-group-text" for="datetime-to">To</label>
+                        <input id="datetime-to" class="form-control" type="date" disabled /> 
+                    </div>
+                    <div class="input-group input-group-sm mb-3">
+                        <label class="input-group-text" for="select-sensor">Sensor</label>
+                        <select class="form-select" id="select-sensor" disabled>
+                            <option selected disabled>Choose...</option>
+                        </select>                        
+                    </div>
+                    <button class="btn mt-3 btn-success" type="button" id="btn-json" disabled="disabled">JSON</button>
+                    <button class="btn mt-3 ms-1 btn-success" type="button" id="btn-chart" disabled="disabled">Create chart</button>
+                </div>
+
+            </div>
+
+            <div class="col-12 col-md-6 mb-4 id="middle">
+                <div class="p-5 mb-4 rounded-3" id="div-output-console" style="height: 100%;">
+                    <div class="accordion accordion-center" id="accordion-base">
+                        <canvas id="myChart" width="500px" height="500px"></canvas>
+                    </div>
+                </div>           
+            </div>
+
+            <div class="col-12 col-md-3 mb-4" id="right">
+                <div class="p-5 mb-4 rounded-3" id="div-connect" style="height: 100%;">
+                    <h4>Data Table</h4>
+                    <div id="table-wrapper">
+                        <div id="table-scroll">
+                            <table class="table table-sm table-dark table-hover" id="table-base">
+                                <thead>
+                                    <tr>
+                                        <th>Datetime</th>
+                                        <th>Meas.</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-body" class="align-middle">
+                                    <tr></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>       
+            </div>            
+            
+        </div>
+
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+            <div class="toast align-items-center text-white bg-danger border-0" id="toast-date-error" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body" id="toast-body">  
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+        
+        <%- include("../partials/footer.ejs")%>
+
+    </div>
+
+    <!-- JavaScript Bundle with Popper -->
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/assets/js/jquery.min.js"></script>	
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@^1"></script>
+
+    <script>
+
+        $(document).ready(function () {
+
+            data = `<%- data %>`;
+            data = data.replace(/[']+/g, '"');
+            data = JSON.parse(data);
+
+            for (var i=0; i<data.length; i++) {
+                console.log(i, data[i][0]);
+                $('#select-station').append(`
+                    <option value="${i}">${data[i][0]}</option>
+                `);
+            }
+
+            $('#select-station').on('click', function() {
+                place = $(this).val();
+                if (place != 'undefined' && place != null) {
+                    begin = data[place][1];
+                    end = data[place][2];
+                    sensors = data[place][3];
+                    // console.log(begin, end);
+                    enableDatetime(true, begin, end); 
+                    enableSensors(true, sensors); 
+                    // changeJson(true);
+                }                    
+            });
+
+            $('#select-sensor').on('click', function() {
+                place = $(this).val();
+                if (place != 'undefined' && place != null) {
+                    changeJson(true);
+                    changeChart(true);  
+                }   
+            });
+
+            $('#btn-json').on('click',async function() {
+                callIstsos(takeValues(), 'json');
+            });
+
+            $('#btn-chart').on('click', function() {
+                callIstsos(takeValues(), 'chart');
+            });
+
+            $('#datetime-to').on('click', function() {
+                $('#datetime-to').attr('min', $('#datetime-from').val());
+            });
+
+            async function callIstsos(inputData, btn) {
+                if (checkDates(inputData[1], inputData[2])) {
+                    // donwload json
+                    if (btn == 'chart' && inputData[3] == 'meteo') 
+                        showToast('Choose another sensor. This is only available for json export.');
+                    else {
+                        info = JSON.stringify({station: inputData[0], startDate: inputData[1], endDate: inputData[2], sensor: inputData[3]});
+                        await $.ajax({
+                            'url':'/chart/take/measures',
+                            'type':'POST',
+                            'data': info,
+                            'success': function(res) {
+                                if (btn == 'json') downloadObjectAsJson(res.result[0], inputData[0]);
+                                else makeChart(res.result[0], inputData);
+                            },
+                            'contentType': "application/json; charset=utf-8",
+                            'dataType': "json",
+                            'processData': false
+                        });
+                    }  
+                }else 
+                    showToast('From and To values are incorrect.');
+            }
+
+            function showToast(msg) {
+                var toast = new bootstrap.Toast($('#toast-date-error'));
+                $('#toast-body').text(msg);
+                toast.show();
+            }
+
+            function takeValues() {
+                place = $('#select-station').val();
+                station = data[place][0];
+                dtFrom = $('#datetime-from').val();
+                dtTo = $('#datetime-to').val();
+                if ($('#select-sensor').val() == -1) sensor = 'meteo';
+                else sensor = data[place][3][$('#select-sensor').val()];
+                return [station, dtFrom, dtTo, sensor];
+            };
+
+            function checkDates(from, to) {
+                if (from <= to) return true;
+                else return false;
+            };
+
+            function enableDatetime(enable, start, end) {
+                if (enable) {
+                    $("#datetime-from").removeAttr('disabled');
+                    $('#datetime-from').val(start.split('T')[0]);
+                    $('#datetime-from').attr('min', start.split('T')[0]);
+                    $('#datetime-from').attr('max', end.split('T')[0]);
+                    $("#datetime-to").removeAttr('disabled');
+                    $('#datetime-to').val(end.split('T')[0]);
+                    $('#datetime-to').attr('min', start.split('T')[0]);
+                    $('#datetime-to').attr('max', end.split('T')[0]);
+
+                }else {
+                    $("#datetime-from").attr('disabled', true);
+                    $("#datetime-to").attr('disabled', true);
+                };
+            };
+
+            function enableSensors(enable, sensors) {
+                if (enable) {
+                    $("#select-sensor").removeAttr('disabled');
+                    $('#select-sensor').append(`
+                        <option value="-1">all (only json)</option>
+                    `);
+                    for (var i=0; i<sensors.length; i++) {
+                        $('#select-sensor').append(`
+                            <option value="${i}">${sensors[i]}</option>
+                        `);
+                    }
+                }else {
+                    $("#select-sensor").attr('disabled', true);
+                };
+            };
+
+            function changeJson(enable) {
+                if (enable) {
+                    $("#btn-json").removeAttr('disabled');
+                }else {
+                    $("#btn-json").attr('disabled', true);
+                };
+            };
+
+            function changeChart(enable) {
+                if (enable) {
+                    $("#btn-chart").removeAttr('disabled');
+                }else {
+                    $("#btn-chart").attr('disabled', true);
+                };
+            };
+
+        });
+
+        function downloadObjectAsJson(exportObj, exportName){
+
+            exportObj = convertToJson(exportObj);
+
+            var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(exportObj);
+            var downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", exportName + ".json");
+            document.body.appendChild(downloadAnchorNode); // required for firefox
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        function makeChart(getReturn, info) {
+            getReturn = convertToJson(getReturn);
+            getReturn = JSON.parse(getReturn);
+
+            var data = getReturn.ObservationCollection.member[0].result.DataArray.values;
+            var allData = [];
+            data.forEach(element => {
+                var datetime = element[0].split('T')[0] + ' ' + element[0].split('T')[1].split('+')[0];
+                allData.push({x:datetime, y:element[1]});
+            });
+            correctTime = period(info[1], info[2]);
+            console.log(allData);
+
+            const ctx = document.getElementById('myChart').getContext('2d');
+
+            let chartStatus = Chart.getChart("myChart"); // <canvas> id
+            if (chartStatus != undefined) {
+                chartStatus.destroy();
+            }
+            const myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: info[3],
+                        data: allData,
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                        fill: false,
+                        borderColor: 'rgb(75, 192, 192)'
+                    }]
+                },
+                options: {
+                    responsive:true,
+                    maintainAspectRatio: false,
+                    title:{
+                        display:true,
+                        text:'Recent History',
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        },
+                        x: {
+                            type: 'time',
+                            time: {
+                                parser: 'YYYY-MM-DD HH:mm:ss',
+                                unit: correctTime[0],
+                                displayFormats: correctTime[1]
+                            },
+                            distribution:'series',
+                            scaleLabel: {
+                                display:true,
+                                labelString:'Time'
+                            },
+                            bounds:'data',
+                            ticks: {
+                                source:'data',
+                            },
+                        }
+                    }
+                }
+            });
+            
+            allData.forEach(el => {
+                $('#table-body').append(
+                    `<tr>
+                    <td class="text-break">${el.x}</td>
+                    <td class="text-break">${el.y}</td>
+                    </tr>`);
+            });
+            
+        }
+
+        function period(start, end) {
+            st = start.split('T');
+            en = end.split('T');
+
+            stD = st[0].split('-');
+            enD = en[0].split('-');
+
+            stD.forEach(x => {
+                x = parseInt(x);
+            });
+
+            enD.forEach(x => {
+                x = parseInt(x);
+            });
+
+            if (enD[2] == stD[2] && enD[1] == stD[1] && enD[0] == stD[0]) {
+                return ['hour', {'hour': 'HH:00'}]
+            }else if (enD[2] - stD[2] <= 2 && enD[1] == stD[1] && enD[0] == stD[0]) {
+                return ['hour', {'hour': 'HH:00 DD-MM'}]
+            }else if (enD[1] == stD[1] && enD[0] == stD[0]) {
+                return ['day', {'day': 'DD-MM'}]
+            }else {
+                return ['month', {'month': 'MM-YYYY'}]
+            }
+        }
+
+        function convertToJson(data) {
+            data = JSON.stringify(data);
+            data = data.replaceAll("None", "null");
+            data = JSON.parse(data);
+            data = data.replace(/[']+/g, '"');
+            data = data.replace(/[#]+/g, "'");
+            return data
+        }
+        
+    </script>
+</body>
+
+</html>

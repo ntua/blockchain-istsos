@@ -1,0 +1,173 @@
+:root {
+    --main-gradient: linear-gradient(to bottom right, #e9cdd9c7 0%, #b8cde6cc 100%);
+    --main-gradient-revert: linear-gradient(to bottom right, #b8cde6 0%, #e9cdd9 100%);
+    --success: rgb(29, 177, 29);
+    --basic: rgb(255, 255, 255);
+    --error: rgb(211, 43, 43);
+}
+
+/* login.ejs */
+.form-signin {
+    background: var(--main-gradient);
+    color: black;
+    width: 100%;
+    max-width: 340px;
+    padding: 15px;
+    border-radius: 0.5rem;
+    margin: auto;
+}
+
+.form-signin .form-floating:focus-within {
+z-index: 2;
+}
+
+.form-signin input[type="region"] {
+margin-bottom: 10px;
+border-top-left-radius: 0;
+border-top-right-radius: 0;
+}
+  
+
+/* main.ejs */
+#div-add-to-istsos {
+    background: var(--main-gradient);
+    color: black;
+}
+
+#div-blockchain-history {
+    background: var(--main-gradient-revert);
+    color: black;
+}
+
+#div-visualize-data {
+    background: var(--bs-dark);
+    color: white;
+}
+ /* add.ejs */
+#div-output-console {
+     background: var(--main-gradient);
+     color: black;
+}
+
+#div-connect {
+    background: var(--bs-dark);
+    color: white;
+}
+
+#div-select {
+    background: var(--bs-dark);
+    color: white;
+}
+
+.bg-success-custom {
+    background-color: green;
+}
+
+.bg-info-custom {
+    background-color: rgb(146, 146, 0);
+}
+
+.bg-danger-custom {
+    background-color: red;
+}
+
+/* timeline.ejs */
+.table {
+    table-layout: fixed;
+}
+
+.accordion-item {
+    border: none;
+    background: none;
+}
+
+.accordion-item .accordion-header button.accordion-button {
+    background: #333435;
+    color: white;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 2;
+    border-radius: 0.2rem;
+    text-decoration: none;
+}
+
+.accordion-header {
+    border-bottom: none;
+    background: transparent;
+    padding: 0px;
+    margin: 2px;
+}
+
+.accordion-button:after {
+    background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'><path fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/></svg>") !important;
+}
+
+.bg-basic-verify {
+    border: 2px solid var(--basic);
+    border-radius: 0.2rem;
+    color: var(--basic);
+    background: transparent;
+}
+
+.bg-success-verify {
+    border: 2px solid var(--success);
+    border-radius: 0.2rem;
+    /* color: var(--success); */
+    background: transparent;
+}
+
+.bg-error-verify {
+    border: 2px solid var(--error);
+    border-radius: 0.2rem;
+    /* color: var(--error); */
+    background: transparent;
+}
+
+.bi-patch-check-fill {
+    color: var(--success)
+}
+
+.bi-patch-minus-fill {
+    color: var(--error)
+}
+
+/* chart.ejs */
+#table-wrapper {
+    position:relative;
+}
+
+#table-scroll {
+    height: 500px;
+    overflow:auto;  
+    margin-top:20px;
+}
+
+#table-wrapper table {
+    width:100%;
+  
+}
+
+#table-wrapper table thead th .text {
+    position:absolute;   
+    top:-20px;
+    z-index:2;
+    height:20px;
+    width:35%;
+    border:1px solid red;
+}
+
+.accordion-center {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* footer.ejs */
+footer {
+    position: relative;
+    bottom: 0%;
+    width: 100%;
+    text-align: center;
+}
